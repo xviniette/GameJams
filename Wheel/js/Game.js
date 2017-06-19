@@ -7,9 +7,9 @@ var gameState = {
 	gravity:500,
 	initialization(){
 		this.score = 0;
-
-		this.generateWheels();
 		this.generateHero();
+		this.generateWheels();
+		this.setGrab(this.wheels.getAt(0), -Math.PI/2);
 	},
 	restart(){
 		this.state.start('game');
@@ -26,13 +26,13 @@ var gameState = {
 
 		this.camera.follow(this.hero);
 
-		this.input.onTap.add(() => {
+		this.input.onDown.add(() => {
 			this.jump();
 		});
 	},
 	jump(){
 		if(this.hero.grab){
-			var speed = 300;
+			var speed = 500;
 			this.hero.body.moves = true;
 			this.hero.body.velocity.set(speed * Math.cos(this.hero.grab.angle + this.hero.grab.wheel.rotation), speed * Math.sin(this.hero.grab.angle + this.hero.grab.wheel.rotation));		
 			this.hero.body.gravity.y = this.gravity;
@@ -59,76 +59,103 @@ var gameState = {
 			this.hero.body.gravity.y = 0;
 			this.hero.x = wheel.x + wheel.width * 0.5 * Math.cos(this.hero.grab.angle + wheel.rotation);
 			this.hero.y = wheel.y + wheel.width * 0.5 * Math.sin(this.hero.grab.angle + wheel.rotation);
+			this.camera.follow(wheel);
+		}else{
+			this.camera.follow(this.hero);
 		}
 
 		if(this.hero.y < this.score){
 			this.score = this.hero.y;
 			this.elements.score.setText(Math.floor(-this.score));
 		}
+		this.generateWheels();
 	},
 	render(){
 		this.wheels.forEach((wheel) => {
-			//game.debug.body(wheel);
+			// game.debug.body(wheel);
 		});
+
+		// game.debug.body(this.hero);
 
 		// game.debug.cameraInfo(game.camera, 32, 32);
 
 		// game.debug.bodyInfo(this.hero, 0, 200);
 	},
 	generateWheels(){
-		this.wheels = this.add.group();
-
-		if(this.wheels.children.length == 0){
-			var radius = 50;
-			this.wheels.add(this.generateWheel(this.world.width / 2, radius, radius * 2, 0));
-
-			this.wheels.add(this.generateWheel(this.world.width / 2, radius, radius * 2, 0));
+		if(!this.wheels){
+			this.wheels = this.add.group();	
+		}
+		var getWheelData = () => {
+			return {
+				distance:this.rnd.between(50, 150),
+				angle:this.rnd.realInRange(-Math.PI * 0.15, -Math.PI * 0.85),
+				radius:this.rnd.between(20, 50),
+				rotation:this.rnd.sign() * this.rnd.between(100, 500)
+			}
 		}
 
+		if(this.wheels.children.length == 0){
+			var radius = 20;
+			this.wheels.add(this.generateWheel(this.world.width / 2, radius, radius * 2, 0));
 
+			var wData = getWheelData();
+			this.wheels.add(this.generateWheel(this.world.width / 2, - wData.distance - this.wheels.getAt(0).radius - wData.radius, wData.radius * 2, wData.rotation));
+		}
 
-		/*var distanceLimit = this.display.canvas.height * 2;
-		while(this.wheels[this.wheels.length - 1].y > this.player.y - distanceLimit){
-			var prev = this.wheels[this.wheels.length - 1];
-			var r = rand(10, 60);
+		var generationDistance = this.camera.view.height;
+		while(this.wheels.children[this.wheels.children.length - 1].y >= this.hero.y - generationDistance){
+			var previousWheel = this.wheels.children[this.wheels.children.length - 1];
 
-			var radius = rand(40, 120);
-
-			do {
-				var angle = -(Math.random() * (2.8 - 0.15) + 0.15);
-				var x = prev.x + Math.cos(angle) * (radius + r + prev.radius);
-				var y = prev.y + Math.sin(angle) * (radius + r + prev.radius);
-			} while (x - r - this.player.radius < 0 || x + r + this.player.radius > this.width);
-			this.wheels.push(new Wheel(x, y, r, (Math.random() > 0.5 ? 1 : -1) * Math.radians(rand(5, 10))));
-		}*/
+			do{
+				var wData = getWheelData();
+				var wheel = {
+					x:previousWheel.x + Math.cos(wData.angle) * (wData.distance + previousWheel.radius + wData.radius),
+					y:previousWheel.y + Math.sin(wData.angle) * (wData.distance + previousWheel.radius + wData.radius),
+				}
+			}while(wheel.x - this.hero.radius - wData.radius < 0 || wheel.x + this.hero.radius + wData.radius > this.world.width);
+			this.wheels.add(this.generateWheel(wheel.x, wheel.y, wData.radius, wData.rotation));
+		}
 	},
-	generateWheel(x, y, diameter, rotationSpeed){
+	generateWheel(x, y, radius, rotationSpeed){
 		var wheel = this.add.sprite(x, y, 'wheel');
-		wheel.anchor.setTo(0.5);
-		wheel.width = diameter;
-		wheel.height = diameter;
+		wheel.anchor.setTo(0.5, 0.5);
+		wheel.radius = radius;
+		wheel.width = radius*2;
+		wheel.height = radius*2;
 		this.physics.arcade.enable(wheel);
-		wheel.body.setCircle(diameter/2);
+		wheel.body.setCircle(
+			radius, 
+			-radius + 0.5 * wheel.width / wheel.scale.x, 
+			-radius + 0.5 * wheel.height / wheel.scale.y
+			);
 		wheel.body.immovable = true;
 		wheel.speed = rotationSpeed;
 		return wheel;
 	},
 	generateHero(){
-		this.hero = this.add.graphics();
-		this.hero.anchor.set(0.5, 0.5);
-		this.hero.beginFill(0xFFFFFF);
-		this.hero.drawCircle(0, 0, 20);
-		this.hero.endFill();
+		var hero = this.add.graphics();
+		hero.radius = 10;
+		hero.anchor.set(0.5, 0.5);
+		hero.beginFill(0xFFFFFF);
+		hero.drawCircle(0, 0, hero.radius * 2);
+		hero.endFill();
 
-		this.physics.arcade.enable(this.hero);
-		this.hero.body.setCircle(10, -10, -10);
+		this.physics.arcade.enable(hero);
+		hero.body.setCircle(
+			hero.radius, 
+			-hero.radius + 0.5 * hero.width / hero.scale.x, 
+			-hero.radius + 0.5 * hero.height / hero.scale.y
+			);
 
-		this.hero.body.gravity.y = this.gravity;
+		hero.body.gravity.y = this.gravity;
 
-		this.setGrab(this.wheels.getAt(0), -Math.PI/2);
+		this.hero = hero;
 	},
 	generateOil(){
-		var oil = this.add.sprite()
+		var oil = this.add.graphics();
+		hero.beginFill(0xFFE100);
+		hero.drawCircle(0, 0, hero.radius * 2);
+		hero.endFill();
 	},
 	setGrab(wheel, angle){
 		this.hero.grab = {
