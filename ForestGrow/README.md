@@ -1,5 +1,6 @@
 # Forest Grow
 ## [Play on itch.io](https://xviniette.itch.io/forest-grow)
+![](https://raw.githubusercontent.com/xviniette/GameJams/gh-pages/ForestGrow/forestgrow.gif)
  - Game Jam : [Gamecodeur Gamejam #7](https://itch.io/jam/gamecodeur-7)
  - Date : 18/06/2017
  
