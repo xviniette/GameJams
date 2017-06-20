@@ -25,6 +25,6 @@ var load = {
 		this.pourcentage.setText(`${this.load.progress}%`);
 	},
 	create(){
-		this.state.start('game');
+		this.state.start('menu');
 	}
 }

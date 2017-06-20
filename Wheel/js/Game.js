@@ -19,6 +19,7 @@ var gameState = {
 		this.state.start('game');
 	},
 	create(){
+		console.log(this.time);
 		this.world.setBounds(0, -9999999999999999, 480, 900000000000000000000);
 		this.physics.startSystem(Phaser.Physics.ARCADE);
 		this.initialization();
