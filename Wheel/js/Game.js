@@ -3,19 +3,23 @@ var gameState = {
 	wheels:null,
 	oil:null,
 	hero:null,
+	walls:null,
 	score:0,
 	gravity:500,
 	initialization(){
+		this.wheels = null;
 		this.score = 0;
 		this.generateHero();
+		this.generateWalls();
 		this.generateWheels();
+		this.generateOil();
 		this.setGrab(this.wheels.getAt(0), -Math.PI/2);
 	},
 	restart(){
 		this.state.start('game');
 	},
 	create(){
-		this.world.setBounds(0, -8000, 480, 900000000000000000000);
+		this.world.setBounds(0, -9999999999999999, 480, 900000000000000000000);
 		this.physics.startSystem(Phaser.Physics.ARCADE);
 		this.initialization();
 
@@ -38,21 +42,13 @@ var gameState = {
 			this.hero.body.gravity.y = this.gravity;
 			this.hero.grab.wheel.heroLeft = Date.now();
 			this.hero.grab = null;
+		}else if(this.hero.propulsion){
+			this.hero.body.velocity.set(this.hero.propulsion * 200, -400);
+			this.hero.body.gravity.y = this.gravity;
 		}
+		this.hero.propulsion = false;
 	},
 	update(){
-		if(!this.hero.grab){
-			this.physics.arcade.overlap(this.hero, this.wheels, (hero, wheel) => {
-				if(!wheel.heroLeft || Date.now() - wheel.heroLeft > 200){
-					this.setGrab(wheel, this.physics.arcade.angleBetween(wheel, hero));
-				}
-			});
-		}
-		
-		this.wheels.forEach((wheel) => {
-			wheel.body.angularVelocity = wheel.speed;
-		});
-
 		if(this.hero.grab){
 			this.hero.body.moves = false;
 			var wheel = this.hero.grab.wheel; 
@@ -64,6 +60,38 @@ var gameState = {
 			this.camera.follow(this.hero);
 		}
 
+		if(!this.hero.grab){
+			this.physics.arcade.overlap(this.hero, this.wheels, (hero, wheel) => {
+				if(!wheel.heroLeft || Date.now() - wheel.heroLeft > 200){
+					this.setGrab(wheel, this.physics.arcade.angleBetween(wheel, hero));
+				}
+			});
+		}
+
+		this.physics.arcade.overlap(this.hero, this.oil, (hero, oil) => {
+			this.dead();
+		});
+
+		this.physics.arcade.overlap(this.hero, this.walls, (hero, wall) => {
+			this.hero.body.gravity.y = 100;
+			if(wall.propulsion == 1){
+				this.hero.x = wall.x + wall.width + this.hero.radius;
+			}else if(wall.propulsion == -1){
+				this.hero.x = wall.x - this.hero.radius;
+			}
+			this.hero.body.velocity.x = 0;
+			this.hero.propulsion = wall.propulsion;
+		});
+		
+		this.wheels.forEach((wheel) => {
+			wheel.body.angularVelocity = wheel.speed;
+		});
+
+		if(-this.score > 100){
+			console.log("xDD");
+			this.oil.body.velocity.set(0, -100);
+		}
+
 		if(this.hero.y < this.score){
 			this.score = this.hero.y;
 			this.elements.score.setText(Math.floor(-this.score));
@@ -71,11 +99,9 @@ var gameState = {
 		this.generateWheels();
 	},
 	render(){
-		this.wheels.forEach((wheel) => {
-			// game.debug.body(wheel);
-		});
-
-		// game.debug.body(this.hero);
+		// this.walls.forEach((wall) => {
+		// 	game.debug.body(wall);
+		// });
 
 		// game.debug.cameraInfo(game.camera, 32, 32);
 
@@ -153,14 +179,43 @@ var gameState = {
 	},
 	generateOil(){
 		var oil = this.add.graphics();
-		hero.beginFill(0xFFE100);
-		hero.drawCircle(0, 0, hero.radius * 2);
-		hero.endFill();
+		oil.beginFill(0xFFE100);
+		oil.drawRect(0, 0, this.camera.view.width, this.camera.view.height);
+		oil.endFill();
+		oil.alpha = 0.5;
+
+		this.physics.arcade.enable(oil);
+		oil.body.immovable = true;
+		this.oil = oil;
+	},
+	generateWalls(){
+		var width = 200;
+		var displayingWidth = 10;
+		this.walls = this.add.group();
+		for(var position of ['left', 'right']){
+			if(position == 'left'){
+				var wall = this.add.graphics(-width + displayingWidth, 0);
+				wall.propulsion = 1;
+			}else{
+				var wall = this.add.graphics(this.camera.view.width - displayingWidth , 0);
+				wall.propulsion = -1;
+			}
+			wall.beginFill(0xf45c42);
+			wall.drawRect(0, 0, 200, this.camera.view.height);
+			wall.endFill();
+			this.physics.arcade.enable(wall);
+			wall.body.immovable = true;
+			wall.fixedToCamera = true;
+			this.walls.add(wall);
+		}
 	},
 	setGrab(wheel, angle){
 		this.hero.grab = {
 			wheel:wheel,
 			angle:angle - wheel.rotation
 		};
+	},
+	dead(){
+		this.state.start('end');
 	}
 }
