@@ -25,6 +25,15 @@ var gameState = {
 		this.generateStars();
 		this.initialization();
 
+		var particleEmitter = this.add.emitter();
+		particleEmitter.makeParticles(['particle1', 'particle2']);
+		particleEmitter.gravity = 200;
+		particleEmitter.setAlpha(1, 0, 2000, Phaser.Easing.Quintic.Out);
+		this.elements.particleEmitter = particleEmitter;
+
+		this.elements.jumpSound = this.add.audio('jump', 0.3);
+		this.elements.explosionSound = this.add.audio('explosion', 0.2);
+
 		var bestScore = localStorage.getItem('bestScoreMoonConquest');
 		console.log(bestScore);
 		if(bestScore){
@@ -56,9 +65,11 @@ var gameState = {
 			this.hero.body.gravity.y = this.gravity;
 			this.hero.grab.wheel.heroLeft = Date.now();
 			this.hero.grab = null;
+			this.elements.jumpSound.play();
 		}else if(this.hero.propulsion){
 			this.hero.body.velocity.set(this.hero.propulsion * 200, -250);
 			this.hero.body.gravity.y = this.gravity;
+			this.elements.jumpSound.play();
 		}
 		this.hero.propulsion = false;
 	},
@@ -81,6 +92,11 @@ var gameState = {
 			this.physics.arcade.overlap(this.hero, this.wheels, (hero, wheel) => {
 				if(!wheel.heroLeft || Date.now() - wheel.heroLeft > 200){
 					this.setGrab(wheel, this.physics.arcade.angleBetween(wheel, hero));
+					var wheel = this.hero.grab.wheel; 
+					var particleEmitter = this.elements.particleEmitter;
+					particleEmitter.x = wheel.x + (wheel.width * 0.5 + this.hero.radius) * Math.cos(this.hero.grab.angle + wheel.rotation);
+					particleEmitter.y = wheel.y + (wheel.width * 0.5 + this.hero.radius) * Math.sin(this.hero.grab.angle + wheel.rotation);
+					particleEmitter.start(true, 500, 0, 20, true);
 				}
 			});
 		}
@@ -238,6 +254,7 @@ var gameState = {
 		};
 	},
 	dead(){
+		this.elements.explosionSound.play();
 		score = Math.floor(-this.score);
 		this.state.start('end');
 	}

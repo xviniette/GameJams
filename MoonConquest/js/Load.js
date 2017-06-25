@@ -11,6 +11,8 @@ var load = {
 			'stars':'./assets/img/stars.png',
 			'over':'./assets/img/over.png',
 			'replay':'./assets/img/replay.png',
+			'particle1':'./assets/img/particulelune1.png',
+			'particle2':'./assets/img/particulelune2.png',
 		};
 
 		for(var id in images){
@@ -18,6 +20,9 @@ var load = {
 		}
 
 		var audios = {
+			'music':'./assets/audio/music.mp3',
+			'jump':'./assets/audio/jump.wav',
+			'explosion':'./assets/audio/explosion.mp3'
 		}
 
 		for(var id in audios){

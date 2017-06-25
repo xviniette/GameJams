@@ -1,5 +1,8 @@
 var menu = {
 	create(){
+		var music = this.add.audio('music', 0.3, true);
+		music.play();
+
 		var stars = game.add.sprite(0, 0, 'starsanimation');
 		var walk = stars.animations.add('walk');
 	    stars.animations.play('walk', 3, true);
