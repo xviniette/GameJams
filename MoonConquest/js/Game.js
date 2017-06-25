@@ -35,7 +35,6 @@ var gameState = {
 		this.elements.explosionSound = this.add.audio('explosion', 0.2);
 
 		var bestScore = localStorage.getItem('bestScoreMoonConquest');
-		console.log(bestScore);
 		if(bestScore){
 			var best = this.add.graphics(0, -bestScore);
 			best.lineStyle(1, 0xf4d742);
