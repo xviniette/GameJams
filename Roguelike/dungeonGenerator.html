@@ -58,6 +58,11 @@
 				1:0.1,
 				2:0.05
 			},
+			destroyAutomate:{
+				1:0,
+				2:0.01,
+				// 3:0.05
+			},
 			maxTiles:200
 		}
 
@@ -129,7 +134,9 @@
 			automates.push({x:Math.floor(tiles.length/2), y:Math.floor(tiles[0].length/2), direction:0});
 
 			while(getFloorCount() < parameters.maxTiles){
-				for(var automate of automates){
+				for(var i = 0; i < automates.length; i++){
+
+					var automate = automates[i];
 					var room = getRandomRoom();
 
 					for(var x = automate.x; x < automate.x + room.width; x++){
@@ -143,9 +150,13 @@
 					automate.y += Math.round(Math.sin(Math.radians(automate.direction)));
 
 					if(parameters.multipleAutomate && parameters.multipleAutomate[automates.length] && Math.random() < parameters.multipleAutomate[automates.length]){
-						console.log("xD");
-						automates.push({x:automate.x, y:automate.y, rotation:automate.rotation})						
+						automates.push({x:automate.x, y:automate.y, rotation:automate.rotation});						
 					}
+
+					// if(parameters.destroyAutomate && parameters.destroyAutomate[automates.length] && Math.random() < parameters.destroyAutomate[automates.length]){
+					// 	automates.splice(i, 1);
+					// 	i--;
+					// }
 				}
 			}
 
