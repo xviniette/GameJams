@@ -1,6 +1,7 @@
 var game;
 var score = 0;
 var bestScoreTag = 'bestScoreDescent';
+var scene, camera, renderer;
 
 window.onload = () => {
 	game = new Phaser.Game(800, 600, Phaser.AUTO, 'render');
