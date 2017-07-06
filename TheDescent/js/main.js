@@ -1,7 +1,7 @@
 var game;
 var score = 0;
 var bestScoreTag = 'bestScoreDescent';
-var scene, camera, renderer;
+var scene, camera, renderer, threejsCanvas;
 
 window.onload = () => {
 	game = new Phaser.Game(800, 600, Phaser.AUTO, 'render');
