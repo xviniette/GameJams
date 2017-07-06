@@ -10,7 +10,9 @@ var boot = {
 		scene = new THREE.Scene();
 		camera = new THREE.PerspectiveCamera(75, this.scale.width / this.scale.height, 0.1, 5000);
 
-		renderer = new THREE.WebGLRenderer();
+		renderer = new THREE.WebGLRenderer({
+			antialias: true
+		});
 		renderer.setSize(this.scale.width, this.scale.height);
 		threejsCanvas = renderer.domElement;
 

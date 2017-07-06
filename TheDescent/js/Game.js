@@ -5,6 +5,8 @@ var gameState = {
 	score: 0,
 	bestScore: null,
 	create() {
+		scene = new THREE.Scene();
+
 		this.score = 0;
 		this.bestScore = null;
 		var s = localStorage.getItem(bestScoreTag);
@@ -18,27 +20,43 @@ var gameState = {
 		this.elements.spriteRender = this.add.sprite(0, 0, null);
 
 
-		var score = this.add.text(this.world.width - 10, 10, 'SCORE', {
+		var score = this.add.text(this.world.width - 10, 10, '', {
 			font: '20px Arial',
 			fill: '#FFFFFF'
 		});
 		score.anchor.x = 1;
 		this.elements.score = score;
 
+		this.ground = new THREE.Mesh(
+			new THREE.PlaneGeometry(
+				5000, 5000),
+			new THREE.MeshLambertMaterial({
+				color: 0xFFFFFF,
+				side: THREE.DoubleSide
+			}));
+			this.ground.rotation.x = Math.PI/2;
+		scene.add(this.ground);
 
-		var light = new THREE.AmbientLight(0xFFFFFF);
-		scene.add(light);
+		var directional = new THREE.DirectionalLight(0xFFFFFF, 1);
+		scene.add(directional);
+
+
+		var ambient = new THREE.AmbientLight(0xFFFFFF, 0.2);
+		scene.add(ambient);
 	},
+
 	update(data) {
 		if (this.input.keyboard.isDown(Phaser.Keyboard.LEFT))
 			this.player.x += this.player.lateralspeed;
 		if (this.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
 			this.player.x -= this.player.lateralspeed;
 
-		// this.player.y += this.player.speed;
+		this.player.y += this.player.speed;
 
-		this.player.element.x = this.player.x;
-		this.player.element.y = this.player.y;
+		this.score = this.player.y;
+		this.elements.score.setText(this.score);
+
+
 
 		for (var obstacle of this.obstacles) {
 			if (Math.sqrt(Math.pow(obstacle.x - this.player.x, 2) + Math.pow(obstacle.y - this.player.y, 2)) <= obstacle.radius + this.player.radius) {
@@ -46,10 +64,18 @@ var gameState = {
 			}
 		}
 		this.generateObstacles();
-		renderer.render(scene, camera);
 		camera.position.x = this.player.x;
-		camera.position.z = this.player.y;
+		camera.position.z = this.player.y - 20;
+		camera.position.y = 5;
 		camera.rotation.y = Math.PI;
+		camera.rotation.x = Math.PI / 8;
+
+		this.ground.position.x = camera.position.x;
+		this.ground.position.z = camera.position.z + 20;
+
+		this.player.mesh.position.x = this.player.x;
+		this.player.mesh.position.z = this.player.y;
+		renderer.render(scene, camera);
 
 		this.elements.spriteRender.texture.destroy(true);
 		this.elements.spriteRender.setTexture(PIXI.Texture.fromCanvas(threejsCanvas, PIXI.scaleModes.DEFAULT));
@@ -58,13 +84,22 @@ var gameState = {
 		this.player = {
 			x: 0,
 			y: 0,
-			radius: 5,
+			radius: 2,
 			speed: 2,
 			lateralspeed: 3
 		}
-		this.player.element = this.add.graphics();
-		this.player.element.lineStyle(2, 0x468745);
-		this.player.element.drawCircle(0, 0, this.player.radius * 2);
+
+		this.player.mesh = new THREE.Mesh(
+			new THREE.SphereGeometry(
+				this.player.radius,
+				6,
+				6),
+			new THREE.MeshLambertMaterial({
+				color: 0xf4d942,
+				side: THREE.DoubleSide
+			}));
+
+		scene.add(this.player.mesh);
 	},
 	generateObstacles() {
 		var distance = 5000;
@@ -94,23 +129,7 @@ var gameState = {
 					radius: 20
 				}
 
-				obstacle.mesh = new THREE.Mesh(
-					new THREE.SphereGeometry(
-						obstacle.radius,
-						20,
-						20),
-					new THREE.MeshLambertMaterial({
-						color: 0x5ff442
-					}));
-
-				obstacle.mesh.position.x = obstacle.x;
-				obstacle.mesh.position.z = obstacle.y;
-
-				scene.add(obstacle.mesh);
-
-				obstacle.element = this.add.graphics(obstacle.x, obstacle.y);
-				obstacle.element.lineStyle(2, 0xFFFFFF);
-				obstacle.element.drawCircle(0, 0, obstacle.radius * 2);
+				this.generate3DObj(obstacle);
 				this.obstacles.push(obstacle);
 			}
 		}
@@ -130,23 +149,7 @@ var gameState = {
 					radius: 20
 				}
 
-				obstacle.mesh = new THREE.Mesh(
-					new THREE.SphereGeometry(
-						obstacle.radius,
-						20,
-						20),
-					new THREE.MeshLambertMaterial({
-						color: 0x5ff442
-					}));
-
-				obstacle.mesh.position.x = obstacle.x;
-				obstacle.mesh.position.z = obstacle.y;
-
-				scene.add(obstacle.mesh);
-
-				obstacle.element = this.add.graphics(obstacle.x, obstacle.y);
-				obstacle.element.lineStyle(2, 0xFFFFFF);
-				obstacle.element.drawCircle(0, 0, obstacle.radius * 2);
+				this.generate3DObj(obstacle);
 				this.obstacles.push(obstacle);
 			}
 
@@ -157,28 +160,29 @@ var gameState = {
 					radius: 20
 				}
 
-				obstacle.mesh = new THREE.Mesh(
-					new THREE.SphereGeometry(
-						obstacle.radius,
-						20,
-						20),
-					new THREE.MeshLambertMaterial({
-						color: 0x5ff442
-					}));
-
-				obstacle.mesh.position.x = obstacle.x;
-				obstacle.mesh.position.z = obstacle.y;
-
-				scene.add(obstacle.mesh);
-
-				obstacle.element = this.add.graphics(obstacle.x, obstacle.y);
-				obstacle.element.lineStyle(2, 0xFFFFFF);
-				obstacle.element.drawCircle(0, 0, obstacle.radius * 2);
+				this.generate3DObj(obstacle);
 				this.obstacles.push(obstacle);
 			}
 		}
 	},
+	generate3DObj(obstacle) {
+		obstacle.mesh = new THREE.Mesh(
+			new THREE.SphereGeometry(
+				obstacle.radius,
+				6,
+				6),
+			new THREE.MeshLambertMaterial({
+				color: 0x5ff442,
+				side: THREE.DoubleSide
+			}));
+
+		obstacle.mesh.position.x = obstacle.x;
+		obstacle.mesh.position.z = obstacle.y;
+
+		scene.add(obstacle.mesh);
+	},
 	death() {
+		console.log("MORT");
 		this.state.start('game');
 	}
 }
