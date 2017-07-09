@@ -4,8 +4,8 @@
  - Game Jam : [Minimalistic Jam](https://itch.io/jam/minimalistic-jam)
  - Date : 09/07/2017
  
-> Moon Conquest is a running game in space ! Leave the Earth and reach the farest Moon !
-> Click or Tap to take off !
-> Developed in 6 hours for the #RemakeJam !
+> The Downhill is a running game. Go as far as possible by avoiding the trees !
+> Left/Right arrow or mouse/touch to move.
+> Developed in 4 hours for the Minimalistic Jam !
 
 [Play on Github](https://xviniette.github.io/GameJams/TheDownhill/)
