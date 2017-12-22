@@ -5,20 +5,20 @@ class MapGenerator {
 
         this.floorMakerParameters = {
             movements: [{
-                    angle: 0,
-                    weight: 5
-                }, {
-                    angle: -Math.PI / 2,
-                    weight: 2
-                },
-                {
-                    angle: Math.PI / 2,
-                    weight: 2
-                },
-                {
-                    angle: Math.PI,
-                    weight: 1
-                }
+                angle: 0,
+                weight: 5
+            }, {
+                angle: -Math.PI / 2,
+                weight: 2
+            },
+            {
+                angle: Math.PI / 2,
+                weight: 2
+            },
+            {
+                angle: Math.PI,
+                weight: 1
+            }
             ],
             rooms: [{
                 size: {
@@ -39,7 +39,7 @@ class MapGenerator {
                 },
                 weight: 1
             }],
-            maxTiles: 110,
+            maxTiles: 200,
             childCreation: {
                 1: 0.2,
                 2: 0.05,
@@ -104,10 +104,11 @@ class MapGenerator {
                 floorMaker.angle += this.getweightedDirection();
                 floorMaker.x += Math.round(Math.cos(floorMaker.angle));
                 floorMaker.y += Math.round(Math.sin(floorMaker.angle));
-                this.setWeightedRoom(map, floorMaker.x, floorMaker.y);
+                this.setWeightedRoom(map, floorMaker.x, floorMaker.y, world);
 
-                if(this.nbFloor(map) > this.floorMakerParameters.maxTiles){
-        console.log("over", Date.now() - start);
+
+                if (this.nbFloor(map) > this.floorMakerParameters.maxTiles) {
+                    this.cropMap(map, world);
                     return map;
                 }
 
@@ -162,7 +163,7 @@ class MapGenerator {
         return 0;
     }
 
-    setWeightedRoom(map, x, y) {
+    setWeightedRoom(map, x, y, world) {
         var totalWeight = 0;
         for (var room of this.floorMakerParameters.rooms) {
             totalWeight += room.weight;
@@ -192,8 +193,37 @@ class MapGenerator {
             for (var j = 0; j < size.y; j++) {
                 var dx = i - center.x;
                 var dy = j - center.y;
-                map[x + dx][y + dy] = 0;
+                var tileX = x + dx;
+                var tileY = y + dy;
+                if(world.minx > tileX){
+                    world.minx = tileX;
+                } 
+
+                if(world.miny > tileY){
+                    world.miny = tileY;
+                } 
+
+                if(world.maxx < tileX){
+                    world.maxx = tileX;
+                } 
+
+                if(world.maxy < tileY){
+                    world.maxy = tileY;
+                } 
+                if(map[tileX][tileY] == 1){
+                    map[tileX][tileY] = 0;
+                }
             }
         }
+    }
+
+    cropMap(map, world){
+        map.splice(0, world.minx - 1);
+        map.splice(world.maxx - world.minx + 3);
+        for(var x in map){
+            map[x].splice(0, world.miny - 1);
+            map[x].splice(world.maxy - world.miny + 3);
+        }
+        return map;
     }
 }
