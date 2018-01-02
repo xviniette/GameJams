@@ -1,5 +1,6 @@
 var menu = {
 	create(){
+		this.state.start('game');
 		//Title
 		var title = this.add.sprite(240, 140, 'title');
 		title.anchor.set(0.5);
