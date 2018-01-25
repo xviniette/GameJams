@@ -2,7 +2,6 @@ var menu = {
 	chalk: null,
 	lastMousePosition: null,
 	create() {
-		this.play();
 		var board = this.add.sprite(0, 0, 'board');
 
 		this.chalk = this.add.bitmapData(this.game.width, this.game.height);
@@ -95,7 +94,6 @@ var menu = {
 		this.chalk.ctx.lineTo(x, y);
 		this.chalk.ctx.stroke();
 
-		return;
 		var length = Math.round(Math.sqrt(Math.pow(x - xLast, 2) + Math.pow(y - yLast, 2)) / (5 / brushDiameter));
 		var xUnit = (x - xLast) / length;
 		var yUnit = (y - yLast) / length;

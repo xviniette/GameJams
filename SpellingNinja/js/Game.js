@@ -36,7 +36,7 @@ var gameState = {
 		}, 2000);
 	},
 	update() {
-		// this.spawn();
+		this.spawn();
 	},
 	render() {
 		this.el.score.setText(Math.round(this.el.score.score));
