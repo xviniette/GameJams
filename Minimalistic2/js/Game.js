@@ -25,6 +25,14 @@ var gameState = {
 					var tile = this.add.graphics(i * this.tileSize, j * this.tileSize);
 					tile.beginFill(0xFF3300);
 					tile.drawRect(0, 0, this.tileSize, this.tileSize);
+				} else if (this.map[i][j].health) {
+					var tile = this.add.graphics(i * this.tileSize, j * this.tileSize);
+					tile.beginFill(0x4286f4);
+					tile.drawRect(0, 0, this.tileSize, this.tileSize);
+				} else if (this.map[i][j].end) {
+					var tile = this.add.graphics(i * this.tileSize, j * this.tileSize);
+					tile.beginFill(0xffffff);
+					tile.drawRect(0, 0, this.tileSize, this.tileSize);
 				}
 			}
 		}

@@ -6,14 +6,14 @@ class MapGenerator {
         this.floorMakerParameters = {
             movements: [{
                     angle: 0,
-                    weight: 8
+                    weight: 50
                 }, {
                     angle: -Math.PI / 2,
-                    weight: 3
+                    weight: 10
                 },
                 {
                     angle: Math.PI / 2,
-                    weight: 3
+                    weight: 10
                 },
                 {
                     angle: Math.PI,
@@ -25,13 +25,13 @@ class MapGenerator {
                     x: 1,
                     y: 1
                 },
-                weight: 5
+                weight: 50
             }, {
                 size: {
                     x: 2,
                     y: 2
                 },
-                weight: 3
+                weight: 20,
             }, {
                 size: {
                     x: 3,
@@ -43,9 +43,9 @@ class MapGenerator {
                     x: 5,
                     y: 5
                 },
-                weight: 1
+                weight: 10
             }],
-            maxTiles: 400,
+            maxTiles: 200,
             childCreation: {
                 1: 0.2,
                 2: 0.05,
@@ -66,7 +66,8 @@ class MapGenerator {
                     "cat": 10,
                     "prout": 1
                 }
-            }
+            },
+            randomWallsRate: 0.02
         };
 
         this.init(data);
@@ -125,7 +126,13 @@ class MapGenerator {
             for (var i = 0; i < this.floorMakers.length; i++) {
                 var floorMaker = this.floorMakers[i];
 
-                floorMaker.angle += this.getweightedDirection();
+                var angle = this.getweightedDirection();
+                if (angle == Math.PI) {
+                    map[floorMaker.x][floorMaker.y] = {
+                        health: true
+                    };
+                }
+                floorMaker.angle += angle;
                 floorMaker.x += Math.round(Math.cos(floorMaker.angle));
                 floorMaker.y += Math.round(Math.sin(floorMaker.angle));
                 this.setWeightedRoom(map, floorMaker.x, floorMaker.y, world);
@@ -143,6 +150,7 @@ class MapGenerator {
                     map[spawn.x][spawn.y] = {
                         spawn
                     };
+                    this.setRandomWalls(map);
                     this.spawnEnnemies(map, spawn);
                     return map;
                 }
@@ -162,6 +170,7 @@ class MapGenerator {
                 //destroy child
                 if (this.floorMakerParameters.childDestroy[this.floorMakers.length]) {
                     if (this.seededRandom() < this.floorMakerParameters.childDestroy[this.floorMakers.length]) {
+                        
                         this.floorMakers.splice(i, 1);
                         i--;
                     }
@@ -169,11 +178,6 @@ class MapGenerator {
 
             }
         }
-    }
-
-    getRandomDirection() {
-        var direction = [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5];
-        return direction[Math.floor(this.seededRandom(direction.length))];
     }
 
     nbFloor(map) {
@@ -188,6 +192,11 @@ class MapGenerator {
         }
 
         return nb;
+    }
+
+    getRandomDirection() {
+        var direction = [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5];
+        return direction[Math.floor(this.seededRandom(direction.length))];
     }
 
     getweightedDirection() {
@@ -256,6 +265,28 @@ class MapGenerator {
                 }
                 if (map[tileX][tileY] == 1) {
                     map[tileX][tileY] = 0;
+                }
+            }
+        }
+    }
+
+    setRandomWalls(map) {
+        var hasNeighbour = (x, y) => {
+            for (var i = x - 1; i <= x + 1; i++) {
+                for (var j = y - 1; j <= y + 1; j++) {
+                    if (!map || !map[i] || map[i][j] == undefined || map[i][j] == 1) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+
+        for (var i = 0; i < map.length; i++) {
+            for (var j = 0; j < map[i].length; j++) {
+                if (map[i][j] == 0 && !hasNeighbour(i, j) && this.floorMakerParameters.randomWallsRate > this.seededRandom()) {
+                    map[i][j] = 1;
                 }
             }
         }

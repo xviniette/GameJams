@@ -1,0 +1,11 @@
+{
+    "correct":[
+        "Correct",
+        "Juste"
+    ],
+    "incorrect":[
+        "Faux",
+        "Faute",
+        "Loupé"
+    ]
+}
