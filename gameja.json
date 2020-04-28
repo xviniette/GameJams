@@ -2,14 +2,13 @@
    "type": "rich",
    "version": "1.0",
    "title": "BAZ'DANCE - Made with GAMEJI",
-   "author_name": "It's time to ditch Skype and TeamSpeak.",
-   "author_url": "https://gameji.app/app/#/user/f6702620-49b3-11ea-b540-593f24f0776b",
+   "author_name": "ElBazia",
    "provider_name": "Gameji",
    "provider_url": "https://gameji.app",
    "thumbnail_url": "https://ezic-prod.s3.amazonaws.com/projects/30563d00-7ff3-11ea-b41c-b96e99bb5d4f/thumbnail.jpg",
-   "thumbnail_width": 768,
-   "thumbnail_height": 768,
+   "thumbnail_width": 240,
+   "thumbnail_height": 240,
    "html": "<iframe width='100%' height='100%' src='https://gameji.app/app/#/embed/Pw2ExA8njw'></iframe>",
-   "width": 768,
-   "height": 768
+   "width": 240,
+   "height": 240
 }
